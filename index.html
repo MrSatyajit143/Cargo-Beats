@@ -30,7 +30,6 @@
             position: relative;
         }
 
-        /* Background Effect */
         body::before {
             content: '';
             position: fixed;
@@ -58,7 +57,6 @@
             padding: 20px;
         }
 
-        /* Ambient Glow */
         .glow-1 {
             position: fixed;
             top: 25%;
@@ -86,7 +84,6 @@
             filter: blur(40px);
         }
 
-        /* Header */
         .header {
             text-align: center;
             margin-bottom: 40px;
@@ -121,7 +118,6 @@
             text-transform: uppercase;
         }
 
-        /* Player Container */
         .player {
             width: 100%;
             max-width: 450px;
@@ -133,7 +129,6 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
-        /* Album Art */
         .album-art {
             width: 100%;
             aspect-ratio: 1;
@@ -188,7 +183,6 @@
             50% { height: 40px; }
         }
 
-        /* Track Info */
         .track-info {
             text-align: center;
             margin-bottom: 25px;
@@ -208,7 +202,6 @@
             color: #06b6d4;
         }
 
-        /* Progress Bar */
         .progress-section {
             margin-bottom: 25px;
         }
@@ -238,7 +231,6 @@
             color: #888;
         }
 
-        /* Controls */
         .controls {
             display: flex;
             align-items: center;
@@ -284,6 +276,8 @@
             font-weight: bold;
             transform: scale(1);
             box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4);
+            border-radius: 50%;
+            cursor: pointer;
         }
 
         .play-btn:hover {
@@ -295,7 +289,6 @@
             transform: scale(0.95);
         }
 
-        /* Volume Control */
         .volume-section {
             display: flex;
             align-items: center;
@@ -350,7 +343,6 @@
             text-align: right;
         }
 
-        /* Playlist */
         .playlist-section {
             border-top: 1px solid rgba(6, 182, 212, 0.2);
             padding-top: 20px;
@@ -459,7 +451,6 @@
             background: rgba(6, 182, 212, 0.6);
         }
 
-        /* Footer */
         .footer {
             margin-top: 40px;
             text-align: center;
@@ -468,7 +459,6 @@
             letter-spacing: 1px;
         }
 
-        /* Install Button */
         .install-btn {
             position: fixed;
             bottom: 20px;
@@ -507,7 +497,18 @@
             }
         }
 
-        /* Responsive */
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            color: #06b6d4;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .loading-indicator.show {
+            display: block;
+        }
+
         @media (max-width: 600px) {
             .header h1 {
                 font-size: 36px;
@@ -559,8 +560,8 @@
             </div>
 
             <div class="track-info">
-                <div class="track-title" id="trackTitle">Midnight Drive</div>
-                <div class="track-artist" id="trackArtist">Road Kings</div>
+                <div class="track-title" id="trackTitle">Loading...</div>
+                <div class="track-artist" id="trackArtist">Demo Player</div>
             </div>
 
             <div class="progress-section">
@@ -569,7 +570,7 @@
                 </div>
                 <div class="time-display">
                     <span id="currentTime">0:00</span>
-                    <span id="duration">4:03</span>
+                    <span id="duration">0:00</span>
                 </div>
             </div>
 
@@ -587,6 +588,10 @@
                 <div class="volume-display" id="volumeDisplay">70%</div>
             </div>
 
+            <div class="loading-indicator" id="loadingIndicator">
+                ⏳ Loading audio... Check browser console for errors
+            </div>
+
             <div class="playlist-section">
                 <div class="playlist-title">Queue</div>
                 <div class="playlist" id="playlist"></div>
@@ -594,11 +599,14 @@
         </div>
 
         <div class="footer">
-            <p>TRUCK MUSIC PLAYER • AUDIO ENGINE V2.0</p>
+            <p>TRUCK MUSIC PLAYER • AUDIO ENGINE V2.1 (WITH REAL AUDIO)</p>
         </div>
     </div>
 
     <button class="install-btn" id="installBtn">📥 Install App</button>
+
+    <!-- AUDIO PLAYER ELEMENT -->
+    <audio id="audioPlayer"></audio>
 
     <script>
         // Register Service Worker
@@ -624,19 +632,45 @@
             }
         });
 
-        window.addEventListener('appinstalled', () => {
-            console.log('App installed');
-            document.getElementById('installBtn').classList.remove('show');
-        });
-
-        // Music Player Logic
+        // ===== TRACKS WITH AUDIO URLS =====
+        // UPDATE THESE URLs with your actual audio file paths
         const tracks = [
-            { title: 'Midnight Drive', artist: 'Road Kings', duration: 243 },
-            { title: 'Highway Dreams', artist: 'Desert Waves', duration: 287 },
-            { title: 'Urban Pulse', artist: 'City Lights', duration: 256 },
-            { title: 'Retro Vibes', artist: 'Analog Soul', duration: 234 },
-            { title: 'Neon Nights', artist: 'Synth Wave', duration: 298 },
-            { title: 'Cargo Run', artist: 'Trucker Tales', duration: 265 }
+            { 
+                title: 'Midnight Drive', 
+                artist: 'Road Kings', 
+                url: '/songs/midnight-drive.mp3',  // ← Add your MP3 file here
+                duration: 243 
+            },
+            { 
+                title: 'Highway Dreams', 
+                artist: 'Desert Waves', 
+                url: '/songs/highway-dreams.mp3',  // ← Add your MP3 file here
+                duration: 287 
+            },
+            { 
+                title: 'Urban Pulse', 
+                artist: 'City Lights', 
+                url: '/songs/urban-pulse.mp3',  // ← Add your MP3 file here
+                duration: 256 
+            },
+            { 
+                title: 'Retro Vibes', 
+                artist: 'Analog Soul', 
+                url: '/songs/retro-vibes.mp3',  // ← Add your MP3 file here
+                duration: 234 
+            },
+            { 
+                title: 'Neon Nights', 
+                artist: 'Synth Wave', 
+                url: '/songs/neon-nights.mp3',  // ← Add your MP3 file here
+                duration: 298 
+            },
+            { 
+                title: 'Cargo Run', 
+                artist: 'Trucker Tales', 
+                url: '/songs/cargo-run.mp3',  // ← Add your MP3 file here
+                duration: 265 
+            }
         ];
 
         let currentTrack = 0;
@@ -646,6 +680,7 @@
         let repeat = 0;
         let volume = 70;
 
+        const audioPlayer = document.getElementById('audioPlayer');
         const playBtn = document.getElementById('playBtn');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
@@ -661,6 +696,7 @@
         const volumeDisplay = document.getElementById('volumeDisplay');
         const playlistEl = document.getElementById('playlist');
         const albumArt = document.getElementById('albumArt');
+        const loadingIndicator = document.getElementById('loadingIndicator');
 
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
@@ -671,17 +707,30 @@
         function updateTrackInfo() {
             trackTitle.textContent = tracks[currentTrack].title;
             trackArtist.textContent = tracks[currentTrack].artist;
-            durationDisplay.textContent = formatTime(tracks[currentTrack].duration);
-            currentTime = 0;
+            
+            // Load audio file
+            audioPlayer.src = tracks[currentTrack].url;
+            audioPlayer.volume = volume / 100;
+            
+            // Update duration once metadata is loaded
+            audioPlayer.onloadedmetadata = () => {
+                durationDisplay.textContent = formatTime(audioPlayer.duration);
+            };
+            
+            audioPlayer.onerror = () => {
+                console.error('Error loading audio:', tracks[currentTrack].url);
+                loadingIndicator.classList.add('show');
+            };
+            
             updatePlaylist();
             albumArt.classList.add('playing');
             setTimeout(() => albumArt.classList.remove('playing'), 600);
         }
 
         function updateProgress() {
-            const progress = (currentTime / tracks[currentTrack].duration) * 100;
+            const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
             progressBar.style.width = progress + '%';
-            currentTimeDisplay.textContent = formatTime(currentTime);
+            currentTimeDisplay.textContent = formatTime(audioPlayer.currentTime);
         }
 
         function updatePlaylist() {
@@ -699,54 +748,24 @@
                 `;
                 item.addEventListener('click', () => {
                     currentTrack = idx;
-                    currentTime = 0;
-                    isPlaying = true;
                     updateTrackInfo();
-                    updatePlayerUI();
-                    play();
+                    playAudio();
                 });
                 playlistEl.appendChild(item);
             });
         }
 
-        function play() {
+        function playAudio() {
+            audioPlayer.play();
             isPlaying = true;
             updatePlayerUI();
-            gameLoop();
+            loadingIndicator.classList.remove('show');
         }
 
-        function pause() {
+        function pauseAudio() {
+            audioPlayer.pause();
             isPlaying = false;
             updatePlayerUI();
-        }
-
-        function gameLoop() {
-            if (!isPlaying) return;
-            
-            currentTime += 1;
-            if (currentTime >= tracks[currentTrack].duration) {
-                if (repeat === 2) {
-                    currentTime = 0;
-                } else {
-                    nextTrack();
-                    return;
-                }
-            }
-            
-            updateProgress();
-            updatePlaylist();
-            
-            // Animate visualizer
-            const bars = document.querySelectorAll('.bar');
-            bars.forEach(bar => {
-                if (Math.random() > 0.5) {
-                    bar.classList.add('active');
-                } else {
-                    bar.classList.remove('active');
-                }
-            });
-            
-            setTimeout(gameLoop, 1000);
         }
 
         function nextTrack() {
@@ -755,20 +774,17 @@
             } else {
                 currentTrack = (currentTrack + 1) % tracks.length;
             }
-            currentTime = 0;
             updateTrackInfo();
-            if (isPlaying) play();
+            if (isPlaying) playAudio();
         }
 
         function prevTrack() {
-            if (currentTime > 3) {
-                currentTime = 0;
+            if (audioPlayer.currentTime > 3) {
+                audioPlayer.currentTime = 0;
             } else {
                 currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
-                currentTime = 0;
                 updateTrackInfo();
             }
-            updateProgress();
             updatePlaylist();
         }
 
@@ -785,15 +801,24 @@
 
             shuffleBtn.classList.toggle('active', shuffle);
             repeatBtn.classList.toggle('active', repeat > 0);
-            if (repeat === 2) {
-                repeatBtn.innerHTML = '🔁 <span style="font-size: 10px; position: absolute; bottom: -8px;">1</span>';
-            }
         }
 
-        // Event Listeners
+        // Audio Event Listeners
+        audioPlayer.addEventListener('timeupdate', updateProgress);
+        
+        audioPlayer.addEventListener('ended', () => {
+            if (repeat === 2) {
+                audioPlayer.currentTime = 0;
+                playAudio();
+            } else {
+                nextTrack();
+            }
+        });
+
+        // Button Event Listeners
         playBtn.addEventListener('click', () => {
-            if (isPlaying) pause();
-            else play();
+            if (isPlaying) pauseAudio();
+            else playAudio();
         });
 
         prevBtn.addEventListener('click', prevTrack);
@@ -812,14 +837,28 @@
         volumeSlider.addEventListener('input', (e) => {
             volume = e.target.value;
             volumeDisplay.textContent = volume + '%';
+            audioPlayer.volume = volume / 100;
         });
 
         progressContainer.addEventListener('click', (e) => {
             const rect = progressContainer.getBoundingClientRect();
             const percent = (e.clientX - rect.left) / rect.width;
-            currentTime = Math.floor(percent * tracks[currentTrack].duration);
-            updateProgress();
+            audioPlayer.currentTime = percent * audioPlayer.duration;
         });
+
+        // Animate Visualizer
+        setInterval(() => {
+            if (isPlaying) {
+                const bars = document.querySelectorAll('.bar');
+                bars.forEach(bar => {
+                    if (Math.random() > 0.5) {
+                        bar.classList.add('active');
+                    } else {
+                        bar.classList.remove('active');
+                    }
+                });
+            }
+        }, 200);
 
         // Initialize
         updateTrackInfo();
