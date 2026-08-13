@@ -52,7 +52,7 @@ The current project includes the following demo tracks:
 
 | # | Track | Artist |
 |---|---|---|
-| 1 | Midnight Drive | Road Kings |
+| 1 | Aigiri Nandini | Mr.Satyajit |
 | 2 | Highway Dreams | Desert Waves |
 | 3 | Urban Pulse | City Lights |
 | 4 | Retro Vibes | Analog Soul |
